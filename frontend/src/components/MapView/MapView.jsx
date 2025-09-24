@@ -27,7 +27,7 @@ const createDefaultIcon = () => {
 }
 
 const defaultCenter = [41.1579, -8.6291] // Porto, Portugal
-const defaultZoom = 7
+const defaultZoom = 13
 
 const MapView = ({ markers = [], center = defaultCenter, zoom = defaultZoom }) => {
   const [isReady, setIsReady] = useState(false)
