@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
+import { MapViewContainer } from './MapView.styles';
 
 // Configure default marker icons to avoid missing images in Vite builds
 const createDefaultIcon = () => {
@@ -27,14 +28,6 @@ const createDefaultIcon = () => {
 const defaultCenter = [41.1579, -8.6291] // Porto, Portugal
 const defaultZoom = 7
 
-const containerStyle = {
-  width: '100%',
-  height: '100%',
-  borderRadius: '12px',
-  overflow: 'hidden',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.25)'
-}
-
 const MapView = ({ center = defaultCenter, zoom = defaultZoom }) => {
   const [ready, setReady] = useState(false)
   const icon = useMemo(() => createDefaultIcon(), [])
@@ -47,7 +40,7 @@ const MapView = ({ center = defaultCenter, zoom = defaultZoom }) => {
   }, [])
 
   return (
-    <div style={containerStyle}>
+    <MapViewContainer>
       <MapContainer
         center={center}
         zoom={zoom}
@@ -66,7 +59,7 @@ const MapView = ({ center = defaultCenter, zoom = defaultZoom }) => {
           </Popup>
         </Marker>
       </MapContainer>
-    </div>
+    </MapViewContainer>
   )
 }
 
