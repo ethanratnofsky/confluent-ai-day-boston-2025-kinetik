@@ -1,0 +1,23 @@
+[
+  { "id": "ribeira-square", "name": "Ribeira Square", "lat": 41.1406, "long": -8.6110 },
+  { "id": "dom-luis-bridge", "name": "Dom Luís I Bridge", "lat": 41.1409, "long": -8.6113 },
+  { "id": "livraria-lello", "name": "Livraria Lello", "lat": 41.1471, "long": -8.6146 },
+  { "id": "clerigos-tower", "name": "Clérigos Tower", "lat": 41.1456, "long": -8.6140 },
+  { "id": "porto-cathedral", "name": "Sé do Porto (Porto Cathedral)", "lat": 41.1428, "long": -8.6111 },
+  { "id": "sao-bento-station", "name": "São Bento Station", "lat": 41.1455, "long": -8.6107 },
+  { "id": "palacio-da-bolsa", "name": "Palácio da Bolsa", "lat": 41.1414, "long": -8.6156 },
+  { "id": "bolhao-market", "name": "Mercado do Bolhão", "lat": 41.1491, "long": -8.6064 },
+  { "id": "casa-da-musica", "name": "Casa da Música", "lat": 41.1581, "long": -8.6291 },
+  { "id": "serralves-museum", "name": "Serralves Museum & Park", "lat": 41.1588, "long": -8.6573 },
+  { "id": "foz-do-douro", "name": "Foz do Douro", "lat": 41.1506, "long": -8.6766 },
+  { "id": "matosinhos-beach", "name": "Matosinhos Beach", "lat": 41.1832, "long": -8.6946 },
+  { "id": "crystal-palace-gardens", "name": "Jardins do Palácio de Cristal", "lat": 41.1478, "long": -8.6260 },
+  { "id": "gaia-cable-car", "name": "Gaia Cable Car", "lat": 41.1381, "long": -8.6077 },
+  { "id": "sandeman-cellars", "name": "Sandeman Wine Cellars", "lat": 41.1383, "long": -8.6119 },
+  { "id": "wow-porto", "name": "World of Wine (WOW)", "lat": 41.1338, "long": -8.6139 },
+  { "id": "estadio-do-dragao", "name": "Estádio do Dragão", "lat": 41.1610, "long": -8.5858 },
+  { "id": "trindade-station", "name": "Trindade Station", "lat": 41.1528, "long": -8.6076 },
+  { "id": "avenida-dos-aliados", "name": "Avenida dos Aliados", "lat": 41.1477, "long": -8.6110 },
+  { "id": "igreja-de-sao-francisco", "name": "Igreja de São Francisco", "lat": 41.1418, "long": -8.6160 }
+]
+

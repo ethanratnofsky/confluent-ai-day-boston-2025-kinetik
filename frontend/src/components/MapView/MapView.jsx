@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer } from 'react-leaflet'
+import Marker from '../Marker'
 import L from 'leaflet'
 import { MapViewContainer } from './MapView.styles';
 
@@ -28,14 +29,24 @@ const createDefaultIcon = () => {
 const defaultCenter = [41.1579, -8.6291] // Porto, Portugal
 const defaultZoom = 7
 
-const MapView = ({ center = defaultCenter, zoom = defaultZoom }) => {
-  const [ready, setReady] = useState(false)
+const MapView = ({ markers = [], center = defaultCenter, zoom = defaultZoom }) => {
+  const [isReady, setIsReady] = useState(false)
   const icon = useMemo(() => createDefaultIcon(), [])
   const mapRef = useRef(null)
 
+  const renderedMarkers = useMemo(() => markers.map(marker => {
+    if (!marker.lat || !marker.long) return null;
+
+    const position = [marker.lat, marker.long];
+
+    return(
+      <Marker key={marker.id} position={position} icon={icon} />
+    )
+  }), [markers, icon])
+
   useEffect(() => {
     // MapContainer onLoad equivalent: mark ready when the map instance is available
-    const timer = setTimeout(() => setReady(true), 0)
+    const timer = setTimeout(() => setIsReady(true), 0)
     return () => clearTimeout(timer)
   }, [])
 
@@ -53,11 +64,7 @@ const MapView = ({ center = defaultCenter, zoom = defaultZoom }) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <Marker position={center} icon={icon}>
-          <Popup>
-            Map ready: {ready ? 'Yes' : 'Initializing...'}
-          </Popup>
-        </Marker>
+        {isReady && renderedMarkers}
       </MapContainer>
     </MapViewContainer>
   )
