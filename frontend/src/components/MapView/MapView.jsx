@@ -90,21 +90,70 @@ const MapView = ({ vehicles = [], pickups = [], center = defaultCenter, zoom = d
   const driverIcon = useMemo(() => createDriverIcon(), [])
   const mapRef = useRef(null)
 
-  const renderedVehicleMarkers = useMemo(() => vehicles.map(v => {
+  // Animated positions for demo purposes
+  const [vehiclePositions, setVehiclePositions] = useState(vehicles)
+  const [pickupPositions, setPickupPositions] = useState(pickups)
+
+  useEffect(() => { setVehiclePositions(vehicles) }, [vehicles])
+  useEffect(() => { setPickupPositions(pickups) }, [pickups])
+
+  // Small random offset in meters, converted to lat/lng degrees
+  function jitterCoordinates(lat, lng, maxMeters) {
+    const metersPerDegreeLat = 111111
+    const latRadians = lat * (Math.PI / 180)
+    const metersPerDegreeLng = Math.cos(latRadians) * metersPerDegreeLat || metersPerDegreeLat
+
+    const u = Math.random()
+    const v = Math.random()
+    const randomRadius = maxMeters * Math.sqrt(u)
+    const randomAngle = 2 * Math.PI * v
+
+    const offsetMetersX = randomRadius * Math.cos(randomAngle)
+    const offsetMetersY = randomRadius * Math.sin(randomAngle)
+
+    const offsetLat = offsetMetersY / metersPerDegreeLat
+    const offsetLng = offsetMetersX / metersPerDegreeLng
+    return [lat + offsetLat, lng + offsetLng]
+  }
+
+  useEffect(() => {
+    const vehicleTimer = setInterval(() => {
+      setVehiclePositions(prev => prev.map(v => {
+        if (!v || !v.lat || !v.long) return v
+        const [lat, lng] = jitterCoordinates(v.lat, v.long, 25)
+        return { ...v, lat, long: lng }
+      }))
+    }, 3000)
+
+    const pickupTimer = setInterval(() => {
+      setPickupPositions(prev => prev.map(p => {
+        if (!p || !p.lat || !p.long) return p
+        const [lat, lng] = jitterCoordinates(p.lat, p.long, 10)
+        return { ...p, lat, long: lng }
+      }))
+    }, 5000)
+
+    return () => {
+      clearInterval(vehicleTimer)
+      clearInterval(pickupTimer)
+    }
+  }, [])
+
+  const renderedVehicleMarkers = useMemo(() => vehiclePositions.map(v => {
     if (!v.lat || !v.long) return null
     const position = [v.lat, v.long]
     return (
       <Marker key={v.id} position={position} icon={driverIcon} />
     )
-  }), [vehicles, driverIcon])
+  }), [vehiclePositions, driverIcon])
 
   const heatmapPoints = useMemo(() => {
-    const base = pickups
+    const base = pickupPositions
       .filter(p => p.lat && p.long)
       .map(p => [p.lat, p.long, 1])
-    const synthetic = generateJitteredHeatmapPoints(pickups, 20, 150)
+    const synthetic = generateJitteredHeatmapPoints(pickupPositions, 20, 150)
     return base.concat(synthetic)
-  }, [pickups])
+  }, [pickupPositions])
 
   useEffect(() => {
     // MapContainer onLoad equivalent: mark ready when the map instance is available
