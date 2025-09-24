@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import Marker from '../Marker'
 import L from 'leaflet'
-import { MapViewContainer } from './MapView.styles';
+import { MapViewContainer, ControlsContainer, ToggleGroup, ToggleButton } from './MapView.styles';
+import HeatmapLayer from '../HeatmapLayer/HeatmapLayer.jsx'
 
 // Configure default marker icons to avoid missing images in Vite builds
 const createDefaultIcon = () => {
@@ -31,6 +32,7 @@ const defaultZoom = 13
 
 const MapView = ({ markers = [], center = defaultCenter, zoom = defaultZoom }) => {
   const [isReady, setIsReady] = useState(false)
+  const [view, setView] = useState('standard') // 'standard' | 'heatmap'
   const icon = useMemo(() => createDefaultIcon(), [])
   const mapRef = useRef(null)
 
@@ -43,6 +45,12 @@ const MapView = ({ markers = [], center = defaultCenter, zoom = defaultZoom }) =
       <Marker key={marker.id} position={position} icon={icon} />
     )
   }), [markers, icon])
+
+  const heatmapPoints = useMemo(() => {
+    return markers
+      .filter(m => m.lat && m.long)
+      .map(m => [m.lat, m.long, 1])
+  }, [markers])
 
   useEffect(() => {
     // MapContainer onLoad equivalent: mark ready when the map instance is available
@@ -64,8 +72,38 @@ const MapView = ({ markers = [], center = defaultCenter, zoom = defaultZoom }) =
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {isReady && renderedMarkers}
+        {isReady && view === 'standard' && renderedMarkers}
+        {isReady && view === 'heatmap' && (
+          <HeatmapLayer
+            points={heatmapPoints}
+            radius={25}
+            blur={15}
+            max={1.0}
+            maxZoom={17}
+          />
+        )}
       </MapContainer>
+
+      <ControlsContainer>
+        <ToggleGroup role="tablist" aria-label="Map view">
+          <ToggleButton
+            type="button"
+            onClick={() => setView('standard')}
+            $active={view === 'standard'}
+            aria-pressed={view === 'standard'}
+          >
+            Standard
+          </ToggleButton>
+          <ToggleButton
+            type="button"
+            onClick={() => setView('heatmap')}
+            $active={view === 'heatmap'}
+            aria-pressed={view === 'heatmap'}
+          >
+            Heatmap
+          </ToggleButton>
+        </ToggleGroup>
+      </ControlsContainer>
     </MapViewContainer>
   )
 }
