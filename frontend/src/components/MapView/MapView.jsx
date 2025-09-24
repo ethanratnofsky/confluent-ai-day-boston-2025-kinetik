@@ -29,7 +29,7 @@ const defaultZoom = 7
 
 const containerStyle = {
   width: '100%',
-  height: '480px',
+  height: '100%',
   borderRadius: '12px',
   overflow: 'hidden',
   boxShadow: '0 8px 24px rgba(0,0,0,0.25)'

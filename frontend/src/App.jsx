@@ -8,7 +8,7 @@ const App = () => {
   return (
     <>
       <Navbar />
-      <div style={{ marginTop: '24px' }}>
+      <div style={{ marginTop: '24px', flex: 1 }}>
         <MapView markers={markers} setMarkers={setMarkers} />
       </div>
     </>
