@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import Marker from '../Marker'
 import L from 'leaflet'
-import { MapViewContainer, ControlsContainer, ToggleGroup, ToggleButton } from './MapView.styles';
-import HeatmapLayer from '../HeatmapLayer/HeatmapLayer.jsx'
+import { MapViewContainer } from './MapView.styles';
+import HeatmapLayer from '../HeatmapLayer'
+import COLORS from '../../constants/styles/colors'
 
 // Configure default marker icons to avoid missing images in Vite builds
 const createDefaultIcon = () => {
@@ -27,30 +28,45 @@ const createDefaultIcon = () => {
   return icon
 }
 
+// Car icon as an inline SVG DivIcon for vehicle markers
+const createCarIcon = () => {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28">
+      <path fill="${COLORS.kinetikBlue}" d="M18.92 6.01C18.72 5.42 18.16 5 17.53 5H6.47C5.84 5 5.28 5.42 5.08 6.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 7h11l1.16 3.34H5.34L6.5 7zM6 16c-1.1 0-1.99-.9-1.99-2S4.9 12 6 12s2 .9 2 2-.9 2-2 2zm12 0c-1.1 0-1.99-.9-1.99-2S16.9 12 18 12s2 .9 2 2-.9 2-2 2z"/>
+    </svg>
+  `
+  return L.divIcon({
+    html: svg,
+    className: 'car-marker-icon',
+    iconSize: [28, 28],
+    iconAnchor: [14, 22],
+    popupAnchor: [0, -20]
+  })
+}
+
 const defaultCenter = [41.1579, -8.6291] // Porto, Portugal
 const defaultZoom = 13
 
-const MapView = ({ markers = [], center = defaultCenter, zoom = defaultZoom }) => {
+const MapView = ({ vehicles = [], pickups = [], center = defaultCenter, zoom = defaultZoom }) => {
   const [isReady, setIsReady] = useState(false)
-  const [view, setView] = useState('standard') // 'standard' | 'heatmap'
-  const icon = useMemo(() => createDefaultIcon(), [])
+  // Keep default icon configured globally (for any future default markers)
+  useMemo(() => createDefaultIcon(), [])
+  const carIcon = useMemo(() => createCarIcon(), [])
   const mapRef = useRef(null)
 
-  const renderedMarkers = useMemo(() => markers.map(marker => {
-    if (!marker.lat || !marker.long) return null;
-
-    const position = [marker.lat, marker.long];
-
-    return(
-      <Marker key={marker.id} position={position} icon={icon} />
+  const renderedVehicleMarkers = useMemo(() => vehicles.map(v => {
+    if (!v.lat || !v.long) return null
+    const position = [v.lat, v.long]
+    return (
+      <Marker key={v.id} position={position} icon={carIcon} />
     )
-  }), [markers, icon])
+  }), [vehicles, carIcon])
 
   const heatmapPoints = useMemo(() => {
-    return markers
-      .filter(m => m.lat && m.long)
-      .map(m => [m.lat, m.long, 1])
-  }, [markers])
+    return pickups
+      .filter(p => p.lat && p.long)
+      .map(p => [p.lat, p.long, 1])
+  }, [pickups])
 
   useEffect(() => {
     // MapContainer onLoad equivalent: mark ready when the map instance is available
@@ -72,8 +88,7 @@ const MapView = ({ markers = [], center = defaultCenter, zoom = defaultZoom }) =
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {isReady && view === 'standard' && renderedMarkers}
-        {isReady && view === 'heatmap' && (
+        {isReady && (
           <HeatmapLayer
             points={heatmapPoints}
             radius={25}
@@ -82,28 +97,8 @@ const MapView = ({ markers = [], center = defaultCenter, zoom = defaultZoom }) =
             maxZoom={17}
           />
         )}
+        {isReady && renderedVehicleMarkers}
       </MapContainer>
-
-      <ControlsContainer>
-        <ToggleGroup role="tablist" aria-label="Map view">
-          <ToggleButton
-            type="button"
-            onClick={() => setView('standard')}
-            $active={view === 'standard'}
-            aria-pressed={view === 'standard'}
-          >
-            Standard
-          </ToggleButton>
-          <ToggleButton
-            type="button"
-            onClick={() => setView('heatmap')}
-            $active={view === 'heatmap'}
-            aria-pressed={view === 'heatmap'}
-          >
-            Heatmap
-          </ToggleButton>
-        </ToggleGroup>
-      </ControlsContainer>
     </MapViewContainer>
   )
 }

@@ -1,0 +1,14 @@
+[
+  { "id": "veh-001", "name": "Vehicle 001", "lat": 41.1569, "long": -8.6261 },
+  { "id": "veh-002", "name": "Vehicle 002", "lat": 41.1542, "long": -8.6124 },
+  { "id": "veh-003", "name": "Vehicle 003", "lat": 41.1510, "long": -8.6205 },
+  { "id": "veh-004", "name": "Vehicle 004", "lat": 41.1595, "long": -8.6332 },
+  { "id": "veh-005", "name": "Vehicle 005", "lat": 41.1620, "long": -8.6401 },
+  { "id": "veh-006", "name": "Vehicle 006", "lat": 41.1491, "long": -8.6064 },
+  { "id": "veh-007", "name": "Vehicle 007", "lat": 41.1475, "long": -8.6112 },
+  { "id": "veh-008", "name": "Vehicle 008", "lat": 41.1532, "long": -8.6148 },
+  { "id": "veh-009", "name": "Vehicle 009", "lat": 41.1578, "long": -8.6290 },
+  { "id": "veh-010", "name": "Vehicle 010", "lat": 41.1601, "long": -8.6355 }
+]
+
+
