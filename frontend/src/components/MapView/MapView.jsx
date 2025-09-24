@@ -28,20 +28,56 @@ const createDefaultIcon = () => {
   return icon
 }
 
-// Car icon as an inline SVG DivIcon for vehicle markers
-const createCarIcon = () => {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28">
-      <path fill="${COLORS.kinetikBlue}" d="M18.92 6.01C18.72 5.42 18.16 5 17.53 5H6.47C5.84 5 5.28 5.42 5.08 6.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 7h11l1.16 3.34H5.34L6.5 7zM6 16c-1.1 0-1.99-.9-1.99-2S4.9 12 6 12s2 .9 2 2-.9 2-2 2zm12 0c-1.1 0-1.99-.9-1.99-2S16.9 12 18 12s2 .9 2 2-.9 2-2 2z"/>
-    </svg>
+// Driver icon: center dot with soft outer radius (live-location style)
+const createDriverIcon = () => {
+  const outer = 28
+  const inner = 10
+  const html = `
+    <div style="position: relative; width: ${outer}px; height: ${outer}px;">
+      <span style="position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:${outer}px; height:${outer}px; background: rgba(50, 102, 245, 0.18); border-radius:50%;"></span>
+      <span style="position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); width:${inner}px; height:${inner}px; background:${COLORS.kinetikBlue}; border-radius:50%; box-shadow:0 0 0 2px #fff;"></span>
+    </div>
   `
+  const half = Math.round(outer / 2)
   return L.divIcon({
-    html: svg,
-    className: 'car-marker-icon',
-    iconSize: [28, 28],
-    iconAnchor: [14, 22],
-    popupAnchor: [0, -20]
+    html,
+    className: 'driver-marker-icon',
+    iconSize: [outer, outer],
+    iconAnchor: [half, half],
+    popupAnchor: [0, -half]
   })
+}
+
+// Generate many jittered points around each pickup to dramatize hotspots
+function generateJitteredHeatmapPoints(pickups, duplicatesPerPickup = 30, radiusMeters = 200) {
+  const points = []
+  const metersPerDegreeLat = 111111
+
+  for (const pickup of pickups) {
+    if (!pickup.lat || !pickup.long) continue
+
+    const baseLat = pickup.lat
+    const baseLng = pickup.long
+    const latRadians = baseLat * (Math.PI / 180)
+    const metersPerDegreeLng = Math.cos(latRadians) * metersPerDegreeLat || metersPerDegreeLat
+
+    for (let i = 0; i < duplicatesPerPickup; i++) {
+      const u = Math.random()
+      const v = Math.random()
+      const randomRadius = radiusMeters * Math.sqrt(u)
+      const randomAngle = 2 * Math.PI * v
+
+      const offsetMetersX = randomRadius * Math.cos(randomAngle)
+      const offsetMetersY = randomRadius * Math.sin(randomAngle)
+
+      const offsetLat = offsetMetersY / metersPerDegreeLat
+      const offsetLng = offsetMetersX / metersPerDegreeLng
+
+      points.push([baseLat + offsetLat, baseLng + offsetLng, 1])
+    }
+  }
+
+  return points
 }
 
 const defaultCenter = [41.1579, -8.6291] // Porto, Portugal
@@ -51,21 +87,23 @@ const MapView = ({ vehicles = [], pickups = [], center = defaultCenter, zoom = d
   const [isReady, setIsReady] = useState(false)
   // Keep default icon configured globally (for any future default markers)
   useMemo(() => createDefaultIcon(), [])
-  const carIcon = useMemo(() => createCarIcon(), [])
+  const driverIcon = useMemo(() => createDriverIcon(), [])
   const mapRef = useRef(null)
 
   const renderedVehicleMarkers = useMemo(() => vehicles.map(v => {
     if (!v.lat || !v.long) return null
     const position = [v.lat, v.long]
     return (
-      <Marker key={v.id} position={position} icon={carIcon} />
+      <Marker key={v.id} position={position} icon={driverIcon} />
     )
-  }), [vehicles, carIcon])
+  }), [vehicles, driverIcon])
 
   const heatmapPoints = useMemo(() => {
-    return pickups
+    const base = pickups
       .filter(p => p.lat && p.long)
       .map(p => [p.lat, p.long, 1])
+    const synthetic = generateJitteredHeatmapPoints(pickups, 20, 150)
+    return base.concat(synthetic)
   }, [pickups])
 
   useEffect(() => {
@@ -96,7 +134,7 @@ const MapView = ({ vehicles = [], pickups = [], center = defaultCenter, zoom = d
             points={heatmapPoints}
             radius={25}
             blur={15}
-            max={1.0}
+            max={2.0}
             maxZoom={17}
           />
         )}
